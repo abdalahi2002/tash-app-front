@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "../component/navbar";
 import { fetchProjets } from "../api/Projet";
+import { Link } from 'react-router-dom';
+
 
 export default function ListeProjet() {
   const [projets, setProjets] = useState([]);
@@ -77,12 +79,12 @@ export default function ListeProjet() {
                   </div>
                   <div className="w-full sm:w-1/2 md:w-1/4 px-3 text-center">
                     <div className="p-5 xl:px-8 md:py-5">
-                      <a
+                      <Link
                         className="block w-full py-2 px-4 rounded text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none transition duration-150 ease-in-out mb-3"
-                        href={`/projets/${projet.id}`}
+                        to={`/projets/${projet.id}`}
                       >
                         View
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
