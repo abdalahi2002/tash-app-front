@@ -33,24 +33,23 @@ export const AuthProvider = ({ children }) => {
         email: e.target.email.value,
         password: e.target.password.value,
       }),
-    //   credentials: "include",
+      //   credentials: "include",
     });
     let data = await response.json();
     if (response.status === 200) {
       setAuthTokens(data.access);
-      SetRefresh(data.refresh)
+      SetRefresh(data.refresh);
       setUser(jwtDecode(data.access));
       localStorage.setItem("authTokens", JSON.stringify(data.access));
       localStorage.setItem("refresh", JSON.stringify(data.refresh));
-      console.log("Token : ",authTokens,"\n refresh : ",refresh)
+      navigate("/");
     } else {
       alert(data.detail);
     }
   };
 
   let updateToken = async () => {
-    
-    let response = await fetch("http://127.0.0.1:8000/refresh/", {
+    let response = await fetch("http://127.0.0.1:8083/api/token/refresh/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -59,13 +58,26 @@ export const AuthProvider = ({ children }) => {
     });
     let data = await response.json();
     if (response.status === 200) {
-      setAuthTokens(data);
-      setUser(jwtDecode(data.token));
-      localStorage.setItem("authTokens", JSON.stringify(data));
+      setAuthTokens(data.access);
+      setUser(jwtDecode(data.access));
+      localStorage.setItem("authTokens", JSON.stringify(data.access));
     } else {
       logout();
     }
   };
+
+  let checkToken = async () => {
+    if (authTokens) {
+      const currentTime = Date.now() / 1000;
+      console.log("timenow : ",currentTime,"\n token exp :",user.exp)
+      if (user.exp-3 < currentTime) {
+        await updateToken();
+      }
+    } else {
+      logout();
+    }
+  };
+
   console.log(refresh);
   let logout = () => {
     setAuthTokens(null);
@@ -76,27 +88,31 @@ export const AuthProvider = ({ children }) => {
   };
   let contextData = {
     user: user,
-    authTokens:authTokens,
+    authTokens: authTokens,
     loginUser: loginUser,
     logout: logout,
+    checkToken: checkToken,
   };
-  
-  useEffect(() => {
-    if (loading) {
-      if(refresh){
-        updateToken();
-        setLoading(false);
-      }else{
-        logout();
-      }
-      
-    }
 
-    let interval = setInterval(() => {
-      setLoading(true);
-    }, 1000 * 60 * 4);
-    return () => clearInterval(interval);
-  }, [refresh, loading]);
+  useEffect(() => {
+    if (user) {
+      const now = Math.floor(Date.now() / 1000);
+      console.log("now : ", now, " \n expire : ", user.exp);
+      if (loading) {
+        if (refresh) {
+          checkToken();
+          setLoading(false);
+        } else {
+          logout();
+        }
+      }
+
+      let interval = setInterval(() => {
+        setLoading(true);
+      },1000 * 60 * 1);
+      return () => clearInterval(interval);
+    }
+  }, [user,refresh, checkToken,loading]);
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>

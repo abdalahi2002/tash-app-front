@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import { fetchProjets } from "../api/Projet";
+import {createtaske}  from "../api/Tache.js";
+import AuthContext from "../Session.js";
 
-import NavBar from "../component/navbar";
-import {createtaske}  from "../api/Task.js";
 
 export default function CreateTask() {
   const [formData, setFormData] = useState({
@@ -16,29 +16,24 @@ export default function CreateTask() {
   });
   const [errors, setErrors] = useState({});
   const [projets, setProjets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { authTokens, checkToken } = useContext(AuthContext);
 
   useEffect(() => {
     const loadProjets = async () => {
-      const cachedProjets = localStorage.getItem("projets");
-      if (cachedProjets) {
-        setProjets(JSON.parse(cachedProjets));
-        setLoading(false);
-      } else {
+      
         try {
-          const data = await fetchProjets();
+          
+        await checkToken();
+          const data = await fetchProjets(authTokens);
           setProjets(data);
           localStorage.setItem("projets", JSON.stringify(data));
         } catch (error) {
           console.error("Erreur lors de la récupération des projets :", error);
-        } finally {
-          setLoading(false);
-        }
-      }
+        } 
     };
 
     loadProjets();
-  }, []);
+  }, [authTokens,checkToken]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,7 +79,9 @@ export default function CreateTask() {
     console.log("Formulaire de Tache:", preparedData);
 
     try {
-      await createtaske(preparedData);
+      
+      await checkToken();
+      await createtaske(preparedData,authTokens);
     } catch (error) {
       alert("Error during creation:", error);
     }
@@ -92,7 +89,6 @@ export default function CreateTask() {
 
   return (
     <div>
-      <NavBar />
       <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
         <div className="relative py-3 sm:max-w-xl sm:mx-auto">
           <div className="relative px-4 py-10 bg-gray-200 shadow shadow-gray-300 mx-8 md:mx-0 rounded-3xl sm:p-10">

@@ -1,11 +1,19 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import PasswordField from "../component/passwfield";
 import AuthContext from "../Session";
-
+import { useNavigate } from "react-router-dom";
 export default function Login() {
-  let { loginUser } = useContext(AuthContext);
-    
+  let { user, loginUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  });
 
+  if (user) {
+    navigate("/");
+  }
   return (
     <div className="w-full h-screen">
       <div className="flex flex-row w-full h-screen">
@@ -27,7 +35,7 @@ export default function Login() {
                 </svg>
               </div>
               <div className="text-2xl text-indigo-800 tracking-wide ml-2 font-semibold">
-                blockify
+                Tache App
               </div>
             </div>
           </div>
@@ -53,17 +61,9 @@ export default function Login() {
                     <div className="text-sm font-bold text-gray-700 tracking-wide">
                       Password
                     </div>
-                    <div>
-                      <a
-                        className="text-xs font-display font-semibold text-indigo-600 hover:text-indigo-800 cursor-pointer"
-                        href="#"
-                      >
-                        Forgot Password?
-                      </a>
-                    </div>
                   </div>
-                  
-                  <PasswordField/>
+
+                  <PasswordField />
                 </div>
                 <div className="mt-10">
                   <button className="bg-indigo-500 text-gray-100 p-4 w-full rounded-full tracking-wide font-semibold font-display focus:outline-none focus:shadow-outline hover:bg-indigo-600 shadow-lg">
@@ -72,10 +72,10 @@ export default function Login() {
                 </div>
               </form>
               <div className="mt-12 text-sm font-display font-semibold text-gray-700 text-center">
-                Don't have an account?{" "}
+                vous n'avez pas de compte?{" "}
                 <a
-                  className="cursor-pointer text-indigo-600 hover:text-indigo-800"
-                  href="#"
+                  className="cursor-pointer text-indigo-500 hover:text-indigo-800"
+                  href="/signup"
                 >
                   Sign up
                 </a>
@@ -269,8 +269,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 }

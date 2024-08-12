@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import { useParams } from "react-router-dom";
 import { deleteProjet, fetchProjet } from "../api/Projet";
 import { Link, useNavigate } from "react-router-dom";
-import NavBar from "../component/navbar";
+import AuthContext from "../Session";
+
 
 export default function Projet() {
   const { id } = useParams();
@@ -10,11 +11,11 @@ export default function Projet() {
   const [projet, setProjet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { user, authTokens, checkToken } = useContext(AuthContext);
   useEffect(() => {
     const loadProjet = async () => {
       try {
-        const data = await fetchProjet(id);
+        const data = await fetchProjet(id,authTokens);
         setProjet(data);
       } catch (error) {
         setError(error);
@@ -24,12 +25,13 @@ export default function Projet() {
     };
 
     loadProjet();
-  }, [id]);
+  }, [id,authTokens]);
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
-        await deleteProjet(id);
+        await checkToken();
+        await deleteProjet(id,authTokens);
 
         navigate("/projet"); // Redirection après suppression
       } catch (error) {
@@ -43,7 +45,6 @@ export default function Projet() {
 
   return (
     <div className="">
-      <NavBar />
       <div className="flex items-center justify-center min-h-screen">
     {error ? (
       <p className="text-3xl text-red-600">Erreur: {error.message}</p>
@@ -98,7 +99,8 @@ export default function Projet() {
                   </div>
                 </div>
               </div>
-              <div className="w-full sm:w-1/2 md:w-1/4 px-3 text-center">
+              {user.is_staff &&(
+                <div className="w-full sm:w-1/2 md:w-1/4 px-3 text-center">
                 <div className="p-5 xl:px-8 md:py-5">
                   <Link
                     className="block w-full py-2 px-4 rounded text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none transition duration-150 ease-in-out mb-3"
@@ -114,6 +116,8 @@ export default function Projet() {
                   </button>
                 </div>
               </div>
+              )}
+              
             </div>
           </div>
         </li>

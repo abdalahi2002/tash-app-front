@@ -1,25 +1,46 @@
 export const registerUser = async (formData) => {
-    try {
-      let response = await fetch("http://localhost:8083/users/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+  try {
+      const response = await fetch("http://localhost:8083/users/", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
       });
-  
-      let data = await response.json();
-  
+
+      const data = await response.json();
+
       if (response.ok) {
-        console.log('User registered successfully:', data);
-        // Vous pouvez ajouter des redirections ou des messages de succès ici
+          console.log('User registered successfully:', data);
+          return { success: true, data }; // Retourne une réponse de succès
       } else {
-        console.error('Registration failed:', data);
-        // Vous pouvez afficher des messages d'erreur ici
+          // Retourne l'erreur en cas d'échec
+          return { success: false, error: data };
       }
-    } catch (error) {
+  } catch (error) {
       console.error('An error occurred:', error);
-      // Vous pouvez gérer les erreurs réseau ici
+      // Retourne une erreur générale en cas de problème réseau
+      return { success: false, error: 'An unexpected error occurred. Please try again.' };
+  }
+};
+
+  export const fetchUser = async (email, authToken) => {
+    try {
+      const response = await fetch(`http://localhost:8083/users/${email}`, {
+        headers: {
+          "Authorization": `Bearer ${authToken}` // Ajout du token d'authentification
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération de profil :", error);
+      throw error; // Propagation de l'erreur pour être gérée dans le composant
     }
   };
+  
+  
   
